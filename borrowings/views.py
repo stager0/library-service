@@ -1,11 +1,17 @@
-from django.template.defaulttags import querystring
-from rest_framework import mixins
+from django.utils import timezone
+from rest_framework import mixins, status
+from rest_framework.decorators import action
 from rest_framework.generics import GenericAPIView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
+from books.models import Book
 from borrowings.models import Borrowing
-from borrowings.serializers import BorrowingSerializer, BorrowingReadSerializer, BorrowingCreateSerializer
+from borrowings.serializers import BorrowingSerializer, BorrowingReadSerializer, BorrowingCreateSerializer, \
+    BorrowingReturnSerializer
 
 
 class BorrowingView(
@@ -52,3 +58,25 @@ class BorrowingView(
 
     def post(self, request, *args, **kwargs):
         return self.create(request, *args, **kwargs)
+
+
+class BorrowingReturnView(APIView):
+    permission_classes = [IsAdminUser,]
+
+    def post(self, request, pk=None):
+        if pk:
+            borrowing = Borrowing.objects.get(pk=pk)
+            book = Book.objects.get(pk=borrowing.book.pk)
+            return_date = request.data.get("actual_return_date")
+
+            serializer = BorrowingReturnSerializer(data={"actual_return_date": return_date})
+            if serializer.is_valid():
+                borrowing.actual_return_date = timezone.now()
+                book.inventory += 1
+                book.save()
+                borrowing.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+
+            return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
+
+        return Response({"detail": "Invalid request."}, status=status.HTTP_400_BAD_REQUEST)

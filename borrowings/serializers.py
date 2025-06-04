@@ -1,7 +1,6 @@
 from django.db import transaction
 from rest_framework import serializers
 
-from books.models import Book
 from books.serializers import BookSerializer
 from borrowings.models import Borrowing
 
@@ -13,7 +12,7 @@ class BorrowingSerializer(serializers.ModelSerializer):
 
 
 class BorrowingReadSerializer(BorrowingSerializer):
-    book = BookSerializer(many=True, read_only=True)
+    book = BookSerializer(read_only=True)
 
 
 class BorrowingCreateSerializer(BorrowingSerializer):

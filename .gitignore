@@ -1,3 +1,44 @@
-.venv
-*__pycache__
-db.sqlite3
+# Django
+*.log
+*.pot
+*.pyc
+*.pyo
+*.db
+*.sqlite3
+*.bak
+*.swp
+
+# IDE files
+.idea/
+.vscode/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+.venv/
+env/
+venv/
+
+# Django migrations
+*/migrations/*
+!*/migrations/__init__.py
+
+# Testing files
+*.coverage
+*.tox
+*.nox
+*.coverage
+*.hypothesis
+
+# Docker
+docker-compose.yml
+Dockerfile
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db

@@ -1,9 +1,10 @@
+from django.db import transaction
 from django.utils import timezone
 from rest_framework import mixins, status
-from rest_framework.decorators import action
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
+from rest_framework.status import HTTP_400_BAD_REQUEST
 from rest_framework.views import APIView
 
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -18,6 +19,7 @@ class BorrowingView(
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
     mixins.CreateModelMixin,
+    mixins.UpdateModelMixin,
     GenericAPIView
 ):
     queryset = Borrowing.objects.all()
@@ -25,7 +27,7 @@ class BorrowingView(
     permission_classes = (IsAuthenticated,)
 
     def get_serializer_class(self):
-        if self.request.method == "GET" and "pk" in self.kwargs:
+        if self.request.method == "GET" and "pk" in self.kwargs and not "return-book" in self.kwargs:
             return BorrowingReadSerializer
         if self.request.method == "POST":
             return BorrowingCreateSerializer
@@ -33,6 +35,7 @@ class BorrowingView(
 
     def get_queryset(self):
         queryset = self.queryset
+
         is_active = self.request.query_params.get("is_active")
         user_id = self.request.query_params.get("user_id")
 
@@ -61,16 +64,20 @@ class BorrowingView(
 
 
 class BorrowingReturnView(APIView):
-    permission_classes = [IsAdminUser,]
+    permission_classes = [IsAdminUser, ]
 
     def post(self, request, pk=None):
-        if pk:
-            borrowing = Borrowing.objects.get(pk=pk)
+        if not pk:
+            return Response({"detail": "Not pk provided"}, status.HTTP_400_BAD_REQUEST)
+
+        borrowing = Borrowing.objects.get(pk=pk)
+
+        with transaction.atomic():
             book = Book.objects.get(pk=borrowing.book.pk)
             return_date = request.data.get("actual_return_date")
 
             serializer = BorrowingReturnSerializer(data={"actual_return_date": return_date})
-            if serializer.is_valid():
+            if serializer.is_valid() and not borrowing.actual_return_date:
                 borrowing.actual_return_date = timezone.now()
                 book.inventory += 1
                 book.save()
@@ -78,5 +85,3 @@ class BorrowingReturnView(APIView):
                 return Response(serializer.data, status=status.HTTP_200_OK)
 
             return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
-
-        return Response({"detail": "Invalid request."}, status=status.HTTP_400_BAD_REQUEST)

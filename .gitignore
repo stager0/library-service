@@ -42,3 +42,5 @@ Dockerfile
 
 # Windows
 Thumbs.db
+
+dump.rdb

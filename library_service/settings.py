@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "borrowings",
     "telegram_bot",
     "rest_framework",
+    "payments",
     "django_celery_beat"
 ]
 

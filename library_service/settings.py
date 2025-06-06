@@ -13,6 +13,7 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
+from celery.schedules import crontab
 from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -31,7 +32,6 @@ DEBUG = True
 AUTH_USER_MODEL = "users.User"
 
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "borrowings",
     "telegram_bot",
     "rest_framework",
+    "django_celery_beat"
 ]
 
 MIDDLEWARE = [
@@ -142,3 +143,16 @@ SIMPLE_JWT = {
 }
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', os.getenv("WEBHOOK_WITHOUT_PROTOCOL_AND_PATH")]
+
+CELERY_BROKER_URL = "redis://localhost:6380/0"
+
+CELERY_RESULT_BACKEND = "redis://localhost:6380/0"
+
+CELERY_TIMEZONE = "UTC"
+
+CELERY_BEAT_SCHEDULE = {
+    "task_every_minute": {
+        "task": "telegram_bot.tasks.every_day_notification",
+        "schedule": crontab(minute=0, hour=10)
+    }
+}

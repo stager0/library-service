@@ -23,5 +23,6 @@ urlpatterns = [
     path("api/books/", include("books.urls", namespace="books")),
     path("api/user/", include("users.urls", namespace="users")),
     path("api/borrowings/", include("borrowings.urls", namespace="borrowings")),
-    path('api/', include('telegram_bot.urls')),
+    path("api/telegram_bot/", include("telegram_bot.urls", namespace="telegram_bot")),
+    path("api/payments/", include("payments.urls", namespace="payments"))
 ]

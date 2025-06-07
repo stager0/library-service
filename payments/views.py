@@ -110,6 +110,37 @@ def create_fine_checkout_session(borrowing_id: int, count_of_delay_days: int):
     return session
 
 
+class SuccessPayView(APIView):
+    def get(self, request, *args, **kwargs):
+        session_id = request.query_params.get("session_id")
+
+        if session_id:
+            session = stripe.checkout.Session.retrieve(session_id)
+            payment = Payment.objects.get(session_id=session_id)
+            borrowing = Borrowing.objects.get(pk=payment.borrowing_id)
+            if session.payment_status == "paid":
+                payment.status="PAID"
+                payment.save()
+                if not payment.type == "FINE":
+                    borrowing.pay_status = "PAID"
+                    borrowing.save()
+                user = get_user_model().objects.get(id=self.request.user.id)
+                try:
+                    user_profile = UserProfile.objects.get(email=user)
+                    send_message(chat_id=user_profile.telegram_chat_id, text=f"You have successfully paid for the book: '{borrowing.book.title}'")
+                except UserProfile.DoesNotExist:
+                    pass
+
+            return Response({
+                "message": "Payment was successful!",
+                "session_id": session.id,
+                "payment_status": session.payment_status,
+                "amount_paid": session.amount_total / 100,
+                "currency": session.currency,
+            }, status=status.HTTP_200_OK)
+        else:
+            return Response({"error": "Session ID is missing"}, status=status.HTTP_400_BAD_REQUEST)
+
 class CreateCheckoutSessionView(APIView):
     def post(self, request):
         serializer = CreatePaymentSessionSerializer(data=request.data)

@@ -21,10 +21,10 @@ def send_message(chat_id, text):
 class TelegramWebhookView(View):
     @csrf_exempt
     def post(self, request, *args, **kwargs):
-        data = json.loads(request.body.decode('UTF-8'))
+        data = json.loads(request.body.decode("UTF-8"))
 
-        chat_id = data['message']['chat']['id']
-        text = data['message']['text']
+        chat_id = data["message"]["chat"]["id"]
+        text = data["message"]["text"]
 
         if text == "/start":
             send_message(chat_id, "Please, enter your email to connect to your account.")

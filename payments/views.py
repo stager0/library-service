@@ -7,6 +7,7 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.decorators import action
 
 from borrowings.models import Borrowing
 from payments.models import Payment
@@ -67,7 +68,6 @@ def create_checkout_session(borrowing_id: int):
         cancel_url=CANCEL_URL
     )
     Payment.objects.create(
-        status="PAID",
         type="PAYMENT",
         borrowing_id=borrowing_id,
         session_url=session.url,

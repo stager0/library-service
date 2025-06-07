@@ -3,6 +3,7 @@ from rest_framework import serializers
 
 from books.serializers import BookSerializer
 from borrowings.models import Borrowing
+from payments.views import create_checkout_session
 from telegram_bot.models import UserProfile
 from telegram_bot.views import send_message
 
@@ -25,9 +26,10 @@ class BorrowingReturnSerializer(serializers.ModelSerializer):
 
 
 class BorrowingCreateSerializer(BorrowingSerializer):
+    checkout_session = serializers.SerializerMethodField(required=False, allow_null=True)
     class Meta:
         model = Borrowing
-        fields = ("id", "borrow_date", "expected_return_date", "actual_return_date", "book")
+        fields = ("id", "borrow_date", "expected_return_date", "actual_return_date", "checkout_session", "book")
         read_only_fields = ("id",)
 
     @transaction.atomic
@@ -53,3 +55,6 @@ class BorrowingCreateSerializer(BorrowingSerializer):
         send_message(chat_id=profile_chat_id, text=f"You have new borrowing:\n{data}")
 
         return borrowing
+
+    def get_checkout_session(self, obj):
+        return create_checkout_session(obj.pk).url

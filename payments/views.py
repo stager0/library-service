@@ -66,6 +66,14 @@ def create_checkout_session(borrowing_id: int):
         success_url=SUCCESS_URL,
         cancel_url=CANCEL_URL
     )
+    Payment.objects.create(
+        status="PAID",
+        type="PAYMENT",
+        borrowing_id=borrowing_id,
+        session_url=session.url,
+        session_id=session.id,
+        money_to_pay=money_to_pay
+    )
     return session
 
 
@@ -78,13 +86,5 @@ class CreateCheckoutSessionView(APIView):
 
             checkout_session = create_checkout_session(borrowing_id)
 
-            Payment.objects.create(
-                status="PAID",
-                type="PAYMENT",
-                borrowing_id=borrowing_id,
-                session_url=checkout_session.session.url,
-                session_id=checkout_session.session.id,
-                money_to_pay=checkout_session.money_to_pay
-            )
             return Response({"checkout_url": checkout_session.session.url}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

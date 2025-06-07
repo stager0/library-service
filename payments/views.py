@@ -1,15 +1,19 @@
+import os
+
 import stripe
+from dotenv import load_dotenv
 from rest_framework import mixins, status
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK
 from rest_framework.views import APIView
 
 from borrowings.models import Borrowing
 from payments.models import Payment
 from payments.serializers import PaymentSerializer
 
+load_dotenv()
+stripe.api_key = os.getenv("STRIPE_PRIVATE_KEY")
 
 class PaymentView(
     mixins.ListModelMixin,

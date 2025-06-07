@@ -141,6 +141,23 @@ class SuccessPayView(APIView):
         else:
             return Response({"error": "Session ID is missing"}, status=status.HTTP_400_BAD_REQUEST)
 
+
+class CancelPayView(APIView):
+    def get(self, request, *args, **kwargs):
+        user = get_user_model().objects.get(pk=self.request.user.pk)
+        canceled_pay = Payment.objects.get(status="PENDING")
+        borrowing = Borrowing.objects.get(pk=canceled_pay.pk)
+        borrowing.actual_return_date = None
+        canceled_pay.delete()
+        borrowing.save()
+        try:
+            user_profile = UserProfile.objects.get(email=user)
+            send_message(chat_id=user_profile.telegram_chat_id, text="You canceled the payment. Please try again...")
+        except UserProfile.DoesNotExist:
+            pass
+        return Response({"message": "Your order was canceled. Please try again"}, status=status.HTTP_200_OK)
+
+
 class CreateCheckoutSessionView(APIView):
     def post(self, request):
         serializer = CreatePaymentSessionSerializer(data=request.data)

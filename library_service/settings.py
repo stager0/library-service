@@ -157,3 +157,7 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": crontab(minute=0, hour=10)
     }
 }
+
+STRIPE_PUBLIC_KEY = os.getenv("STRIPE_PUBLIC_KEY")
+
+STRIPE_PRIVATE_KEY = os.getenv("STRIPE_PRIVATE_KEY")

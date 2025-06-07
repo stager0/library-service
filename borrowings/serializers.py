@@ -27,9 +27,10 @@ class BorrowingReturnSerializer(serializers.ModelSerializer):
 
 class BorrowingCreateSerializer(BorrowingSerializer):
     checkout_session = serializers.SerializerMethodField(required=False, allow_null=True)
+    checkout_session_overdue = serializers.SerializerMethodField(required=False, read_only=True, allow_null=True)
     class Meta:
         model = Borrowing
-        fields = ("id", "borrow_date", "expected_return_date", "actual_return_date", "checkout_session", "book")
+        fields = ("id", "borrow_date", "expected_return_date", "checkout_session_overdue", "checkout_session", "book")
         read_only_fields = ("id",)
 
     @transaction.atomic

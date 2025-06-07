@@ -10,8 +10,13 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from books.models import Book
 from borrowings.models import Borrowing
-from borrowings.serializers import BorrowingSerializer, BorrowingReadSerializer, BorrowingCreateSerializer, \
+from borrowings.serializers import (
+    BorrowingSerializer,
+    BorrowingReadSerializer,
+    BorrowingCreateSerializer,
     BorrowingReturnSerializer
+)
+from payments.views import create_fine_checkout_session
 
 
 class BorrowingView(
@@ -59,28 +64,36 @@ class BorrowingView(
         return self.list(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-       return self.create(request, *args, **kwargs)
+        return self.create(request, *args, **kwargs)
 
 
 class BorrowingReturnView(APIView):
-    permission_classes = [IsAdminUser, ]
+    permission_classes = [IsAdminUser,]
 
     def post(self, request, pk=None):
         if not pk:
             return Response({"detail": "Not pk provided"}, status.HTTP_400_BAD_REQUEST)
 
-        borrowing = Borrowing.objects.get(pk=pk)
+        borrowing_obj = Borrowing.objects.get(pk=pk)
 
         with transaction.atomic():
-            book = Book.objects.get(pk=borrowing.book.pk)
+            book = Book.objects.get(pk=borrowing_obj.book.pk)
             return_date = request.data.get("actual_return_date")
 
             serializer = BorrowingReturnSerializer(data={"actual_return_date": return_date})
-            if serializer.is_valid() and not borrowing.actual_return_date:
-                borrowing.actual_return_date = timezone.now()
+            if serializer.is_valid() and not borrowing_obj.actual_return_date and book.inventory > 0:
+                borrowing_obj.actual_return_date = timezone.now()
                 book.inventory += 1
                 book.save()
-                borrowing.save()
-                return Response(serializer.data, status=status.HTTP_200_OK)
+                borrowing_obj.save()
+                count_of_delay_days = (borrowing_obj.expected_return_date - timezone.now()).days
+                if count_of_delay_days > 0:
+                    session_fine = create_fine_checkout_session(
+                        borrowing_id=borrowing_obj.id,
+                        count_of_delay_days=count_of_delay_days
+                    )
+                    return Response({"checkout_fine_url": session_fine.url}, status=status.HTTP_200_OK)
+                elif count_of_delay_days <= 0:
+                    return Response({"message": "You don't have overdue!"}, status=status.HTTP_200_OK)
 
             return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)

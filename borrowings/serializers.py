@@ -11,7 +11,8 @@ from telegram_bot.views import send_message
 class BorrowingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Borrowing
-        fields = ("id", "borrow_date", "expected_return_date", "actual_return_date", "book", "user")
+        fields = ("id", "borrow_date", "expected_return_date", "actual_return_date", "book", "user", "pay_status")
+        read_only_fields = ("id", "pay_status", "user")
 
 
 class BorrowingReadSerializer(BorrowingSerializer):
@@ -29,8 +30,8 @@ class BorrowingCreateSerializer(BorrowingSerializer):
     checkout_session = serializers.SerializerMethodField(required=False, allow_null=True)
     class Meta:
         model = Borrowing
-        fields = ("id", "borrow_date", "expected_return_date", "actual_return_date", "checkout_session", "book")
-        read_only_fields = ("id",)
+        fields = ("id", "borrow_date", "expected_return_date", "checkout_session", "book", "pay_status")
+        read_only_fields = ("id", "pay_status")
 
     @transaction.atomic
     def create(self, validated_data):

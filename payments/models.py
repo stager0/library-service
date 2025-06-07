@@ -9,7 +9,7 @@ class Payment(models.Model):
         PAYMENT = "Payment"
         FINE = "Fine"
 
-    status = models.CharField(max_length=255, choices=StatusChoices)
+    status = models.CharField(max_length=255, choices=StatusChoices, blank=True, null=True, default="PENDING")
     type = models.CharField(max_length=255, choices=TypeChoices)
     borrowing_id = models.IntegerField()
     session_url = models.URLField(max_length=255)

@@ -1,6 +1,7 @@
 import os
 
 import stripe
+from django.contrib.auth import get_user_model
 from dotenv import load_dotenv
 from rest_framework import mixins, status
 from rest_framework.generics import GenericAPIView
@@ -14,10 +15,12 @@ from payments.serializers import (
     PaymentSerializer,
     CreatePaymentSessionSerializer
 )
+from telegram_bot.models import UserProfile
+from telegram_bot.views import send_message
 
-
-SUCCESS_URL=f"https://{os.getenv("WEBHOOK_WITHOUT_PROTOCOL_AND_PATH")}/api/payments/payment-list/"
-CANCEL_URL=f"https://{os.getenv("WEBHOOK_WITHOUT_PROTOCOL_AND_PATH")}/api/payments/create-checkout-session/"
+FINE_MULTIPLIER = 2
+SUCCESS_URL=f"https://{os.getenv('WEBHOOK_WITHOUT_PROTOCOL_AND_PATH')}/api/payments/success-pay/?session_id="
+CANCEL_URL=f"https://{os.getenv('WEBHOOK_WITHOUT_PROTOCOL_AND_PATH')}/api/payments/cancel-pay/"
 
 load_dotenv()
 stripe.api_key = os.getenv("STRIPE_PRIVATE_KEY")
@@ -63,11 +66,10 @@ def create_checkout_session(borrowing_id: int):
             "quantity": 1
         }],
         mode="payment",
-        success_url=SUCCESS_URL,
+        success_url=SUCCESS_URL + "{CHECKOUT_SESSION_ID}",
         cancel_url=CANCEL_URL
     )
     Payment.objects.create(
-        status="PAID",
         type="PAYMENT",
         borrowing_id=borrowing_id,
         session_url=session.url,
@@ -75,6 +77,85 @@ def create_checkout_session(borrowing_id: int):
         money_to_pay=money_to_pay
     )
     return session
+
+def create_fine_checkout_session(borrowing_id: int, count_of_delay_days: int):
+    borrowing_obj = Borrowing.objects.get(id=borrowing_id)
+    overdue_fine = (count_of_delay_days * borrowing_obj.book.daily_fee) * FINE_MULTIPLIER
+    overdue_fine_in_cents = int(overdue_fine * 100)
+
+    session = stripe.checkout.Session.create(
+        payment_method_types=["card"],
+        line_items=[{
+            "price_data": {
+                "currency": "usd",
+                "product_data": {
+                    "name": f"Fine of overdue days for book: '{borrowing_obj.book.title}'\n "
+                            f"Count of overdue days: {count_of_delay_days}"
+                },
+                "unit_amount": overdue_fine_in_cents
+            },
+            "quantity": 1
+        }],
+        mode="payment",
+        success_url=SUCCESS_URL + "{CHECKOUT_SESSION_ID}",
+        cancel_url=CANCEL_URL
+    )
+    Payment.objects.create(
+        type="FINE",
+        borrowing_id=borrowing_id,
+        session_url=session.url,
+        session_id=session.id,
+        money_to_pay=overdue_fine
+    )
+    return session
+
+
+class SuccessPayView(APIView):
+    def get(self, request, *args, **kwargs):
+        session_id = request.query_params.get("session_id")
+
+        if session_id:
+            session = stripe.checkout.Session.retrieve(session_id)
+            payment = Payment.objects.get(session_id=session_id)
+            borrowing = Borrowing.objects.get(pk=payment.borrowing_id)
+            if session.payment_status == "paid":
+                payment.status="PAID"
+                payment.save()
+                if not payment.type == "FINE":
+                    borrowing.pay_status = "PAID"
+                    borrowing.save()
+                user = get_user_model().objects.get(id=self.request.user.id)
+                try:
+                    user_profile = UserProfile.objects.get(email=user)
+                    send_message(chat_id=user_profile.telegram_chat_id, text=f"You have successfully paid for the book: '{borrowing.book.title}'")
+                except UserProfile.DoesNotExist:
+                    pass
+
+            return Response({
+                "message": "Payment was successful!",
+                "session_id": session.id,
+                "payment_status": session.payment_status,
+                "amount_paid": session.amount_total / 100,
+                "currency": session.currency,
+            }, status=status.HTTP_200_OK)
+        else:
+            return Response({"error": "Session ID is missing"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CancelPayView(APIView):
+    def get(self, request, *args, **kwargs):
+        user = get_user_model().objects.get(pk=self.request.user.pk)
+        canceled_pay = Payment.objects.get(status="PENDING")
+        borrowing = Borrowing.objects.get(pk=canceled_pay.pk)
+        borrowing.actual_return_date = None
+        canceled_pay.delete()
+        borrowing.save()
+        try:
+            user_profile = UserProfile.objects.get(email=user)
+            send_message(chat_id=user_profile.telegram_chat_id, text="You canceled the payment. Please try again...")
+        except UserProfile.DoesNotExist:
+            pass
+        return Response({"message": "Your order was canceled. Please try again"}, status=status.HTTP_200_OK)
 
 
 class CreateCheckoutSessionView(APIView):

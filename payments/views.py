@@ -45,39 +45,46 @@ class PaymentView(
         return self.retrieve(request, *args, **kwargs)
 
 
+def create_checkout_session(borrowing_id: int):
+    borrowing_obj = Borrowing.objects.get(id=borrowing_id)
+    money_to_pay = (borrowing_obj.expected_return_date - borrowing_obj.borrow_date).days * borrowing_obj.book.daily_fee
+    amount_in_cents = int(money_to_pay * 100)
+
+    session = stripe.checkout.Session.create(
+        payment_method_types=["card"],
+        line_items=[{
+            "price_data": {
+                "currency": "usd",
+                "product_data": {
+                    "name": borrowing_obj.book.title
+                },
+                "unit_amount": amount_in_cents,
+            },
+            "quantity": 1
+        }],
+        mode="payment",
+        success_url=SUCCESS_URL,
+        cancel_url=CANCEL_URL
+    )
+    return session
+
+
 class CreateCheckoutSessionView(APIView):
     def post(self, request):
         serializer = CreatePaymentSessionSerializer(data=request.data)
 
         if serializer.is_valid():
-            money_to_pay = serializer.validated_data["money_to_pay"]
             borrowing_id = serializer.validated_data["borrowing_id"]
-            borrowing_obj = Borrowing.objects.get(id=borrowing_id)
-            amount_in_cents = int(money_to_pay * 100)
 
-            session = stripe.checkout.Session.create(
-                payment_method_types=["card"],
-                line_items=[{
-                    "price_data": {
-                        "currency": "usd",
-                        "product_data": {
-                            "name": borrowing_obj.book.title
-                        },
-                        "unit_amount": amount_in_cents,
-                    },
-                    "quantity": 1
-                }],
-                mode="payment",
-                success_url=SUCCESS_URL,
-                cancel_url=CANCEL_URL
-            )
+            checkout_session = create_checkout_session(borrowing_id)
+
             Payment.objects.create(
                 status="PAID",
                 type="PAYMENT",
                 borrowing_id=borrowing_id,
-                session_url=session.url,
-                session_id=session.id,
-                money_to_pay=money_to_pay
+                session_url=checkout_session.session.url,
+                session_id=checkout_session.session.id,
+                money_to_pay=checkout_session.money_to_pay
             )
-            return Response({"checkout_url": session.url}, status=status.HTTP_200_OK)
+            return Response({"checkout_url": checkout_session.session.url}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

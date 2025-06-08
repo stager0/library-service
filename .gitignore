@@ -33,10 +33,6 @@ venv/
 *.coverage
 *.hypothesis
 
-# Docker
-docker-compose.yml
-Dockerfile
-
 # macOS
 .DS_Store
 

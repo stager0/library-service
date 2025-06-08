@@ -39,4 +39,8 @@ venv/
 # Windows
 Thumbs.db
 
+# Ignore Celery beat schedule files
+celerybeat-schedule
+celerybeat-schedule-shm
+celerybeat-schedule-wal
 dump.rdb

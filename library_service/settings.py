@@ -143,11 +143,11 @@ SIMPLE_JWT = {
     "ROTATE_REFRESH_TOKENS": False
 }
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', os.getenv("WEBHOOK_WITHOUT_PROTOCOL_AND_PATH")]
+ALLOWED_HOSTS = ["127.0.0.1", "localhost", os.getenv("WEBHOOK_WITHOUT_PROTOCOL_AND_PATH"), "1747-176-3-135-185.ngrok-free.app"]
 
-CELERY_BROKER_URL = "redis://localhost:6380/0"
+CELERY_BROKER_URL = "redis://redis:6379/0"
 
-CELERY_RESULT_BACKEND = "redis://localhost:6380/0"
+CELERY_RESULT_BACKEND = "redis://redis:6379/0"
 
 CELERY_TIMEZONE = "UTC"
 

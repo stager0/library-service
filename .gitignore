@@ -33,14 +33,14 @@ venv/
 *.coverage
 *.hypothesis
 
-# Docker
-docker-compose.yml
-Dockerfile
-
 # macOS
 .DS_Store
 
 # Windows
 Thumbs.db
 
+# Ignore Celery beat schedule files
+celerybeat-schedule
+celerybeat-schedule-shm
+celerybeat-schedule-wal
 dump.rdb

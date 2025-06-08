@@ -47,7 +47,8 @@ INSTALLED_APPS = [
     "telegram_bot",
     "rest_framework",
     "payments",
-    "django_celery_beat"
+    "django_celery_beat",
+    "drf_spectacular"
 ]
 
 MIDDLEWARE = [
@@ -134,7 +135,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
-    )
+    ),
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema"
 }
 
 SIMPLE_JWT = {
@@ -161,3 +163,10 @@ CELERY_BEAT_SCHEDULE = {
 STRIPE_PUBLIC_KEY = os.getenv("STRIPE_PUBLIC_KEY")
 
 STRIPE_PRIVATE_KEY = os.getenv("STRIPE_PRIVATE_KEY")
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Library Service API",
+    "DESCRIPTION": "Library Service API. The best Library.",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+}

@@ -15,6 +15,7 @@ class BookViewSet(viewsets.ModelViewSet):
         summary="Create a new Book",
         description="This endpoint allow you create a new Book with provided data",
         tags=["book"],
+        request=BookSerializer,
         responses={
             201: BookSerializer,
             400: OpenApiResponse(
@@ -65,7 +66,7 @@ class BookViewSet(viewsets.ModelViewSet):
         summary="Get a list of all Books",
         description="Return a list of all Book what are registered in the DataBase",
         tags=["book"],
-        request={
+        responses={
             200: BookSerializer(many=True),
         },
         examples=[
@@ -89,8 +90,8 @@ class BookViewSet(viewsets.ModelViewSet):
         summary="Get a book by ID ",
         description="Retrieve a Book by given ID",
         tags=["book"],
-        request={
-            200: BookSerializer(many=True),
+        responses={
+            200: BookSerializer(),
             400: OpenApiResponse(description="Bad Request"),
             404: OpenApiResponse(description="Not Found"),
         },
@@ -115,8 +116,8 @@ class BookViewSet(viewsets.ModelViewSet):
         summary="Update a book",
         description="Update a book by given ID",
         tags=["book"],
-        responses=BookSerializer,
-        request={
+        request=BookSerializer,
+        responses={
             200: BookSerializer(),
             404: OpenApiResponse(description="Not Found"),
             400: OpenApiResponse(
@@ -165,8 +166,8 @@ class BookViewSet(viewsets.ModelViewSet):
         summary="Delete a book",
         description="Destroy a book by given ID",
         tags=["book"],
-        responses=BookSerializer,
-        request={
+        request=BookSerializer,
+        responses={
             204: OpenApiResponse(description="No Content"),
             404: OpenApiResponse(description="Book Not Found")
         }
@@ -178,8 +179,8 @@ class BookViewSet(viewsets.ModelViewSet):
         summary="Partially updates the book",
         description="It partially updates the book by given id and data (only for admins)",
         tags=["book"],
-        responses=BookSerializer,
-        request={
+        request=BookSerializer,
+        responses={
             200: BookSerializer(),
             404: OpenApiResponse(description="Not Found"),
             400: OpenApiResponse(description="Bad Request")

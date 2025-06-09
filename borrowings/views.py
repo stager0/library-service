@@ -1,6 +1,6 @@
 from django.db import transaction
 from django.utils import timezone
-from drf_spectacular.utils import extend_schema, OpenApiResponse, OpenApiExample, OpenApiParameter
+from drf_spectacular.utils import extend_schema, OpenApiResponse, OpenApiExample, OpenApiParameter, extend_schema_view
 from rest_framework import status, viewsets
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
@@ -60,7 +60,8 @@ class BorrowingView(viewsets.ModelViewSet):
         summary="Get a list of all Borrowings",
         description="Return a list of all Borrowings what belong to request user (if user is admin, it returns all borrowings)",
         tags=["borrowing"],
-        request={
+        request=BorrowingSerializer(many=True),
+        responses={
             200: BorrowingSerializer(many=True),
         },
         parameters=[
@@ -106,6 +107,7 @@ class BorrowingView(viewsets.ModelViewSet):
         summary="Create a new Borrowing",
         description="This endpoint allow you create a new Borrowing with provided data",
         tags=["borrowing"],
+        request=BorrowingCreateSerializer,
         responses={
             201: BorrowingCreateSerializer,
             400: OpenApiResponse(
@@ -140,7 +142,8 @@ class BorrowingView(viewsets.ModelViewSet):
         summary="Get a Borrowing by ID ",
         description="Retrieve a Borrowing by given ID",
         tags=["borrowing"],
-        request={
+        request=BorrowingReadSerializer,
+        responses={
             200: BorrowingReadSerializer(),
             400: OpenApiResponse(description="Bad Request"),
             404: OpenApiResponse(description="Not Found"),
@@ -176,8 +179,8 @@ class BorrowingView(viewsets.ModelViewSet):
         summary="Update a Borrowing",
         description="Update a Borrowing by given ID",
         tags=["borrowing"],
-        responses=BorrowingSerializer,
-        request={
+        request=BorrowingSerializer,
+        responses={
             200: BorrowingSerializer(),
             404: OpenApiResponse(description="Not Found"),
             400: OpenApiResponse(
@@ -218,8 +221,8 @@ class BorrowingView(viewsets.ModelViewSet):
         summary="Delete a borrowing",
         description="Destroy a borrowing by given ID",
         tags=["borrowing"],
-        responses=BorrowingSerializer,
-        request={
+        request=BorrowingSerializer,
+        responses={
             204: OpenApiResponse(description="No Content"),
             404: OpenApiResponse(description="Book Not Found")
         }
@@ -230,9 +233,9 @@ class BorrowingView(viewsets.ModelViewSet):
     @extend_schema(
         summary="Partially updates the borrowing",
         description="It partially updates the borrowing by given id and data (only for admins)",
-        tags=["book"],
-        responses=BorrowingSerializer,
-        request={
+        tags=["borrowing"],
+        request=BorrowingSerializer,
+        responses={
             200: BorrowingSerializer(),
             404: OpenApiResponse(description="Not Found"),
             400: OpenApiResponse(description="Bad Request")
@@ -259,9 +262,9 @@ class BorrowingReturnView(APIView):
         description="Returns book and checks if the fine must be pay. "
                     "Returns a pay link to Stripe and in case successfully "
                     "payment will notice it ti the DataBase",
-        tags=["Borrowing"],
-        responses=BorrowingReturnSerializer,
-        request={
+        tags=["borrowing"],
+        request=BorrowingReturnSerializer,
+        responses={
             200: OpenApiResponse(
                 description="OK",
                 examples=[
@@ -314,7 +317,7 @@ class BorrowingReturnView(APIView):
             return_date = request.data.get("actual_return_date")
 
             serializer = BorrowingReturnSerializer(data={"actual_return_date": return_date})
-            if serializer.is_valid() and not borrowing_obj.actual_return_date and book.inventory > 0 and borrowing_obj:
+            if serializer.is_valid() and not borrowing_obj.actual_return_date and borrowing_obj:
                 borrowing_obj.actual_return_date = timezone.now()
                 book.inventory += 1
                 book.save()

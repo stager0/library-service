@@ -1,4 +1,5 @@
 from django.db import transaction
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from books.serializers import BookSerializer
@@ -57,5 +58,11 @@ class BorrowingCreateSerializer(BorrowingSerializer):
 
         return borrowing
 
+    @extend_schema_field(str)
     def get_checkout_session(self, obj):
         return create_checkout_session(obj.pk).url
+
+    def validate_expected_return_date(self, value):
+        if value:
+            return value
+        raise serializers.ValidationError("Expected return date must be provided!")

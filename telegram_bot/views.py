@@ -5,15 +5,17 @@ from django.http import JsonResponse
 from django.views import View
 import json
 import requests
-from dotenv import load_dotenv
+from environ import environ
 
 from telegram_bot.models import UserProfile
 
-load_dotenv()
+
+env = environ.Env()
+environ.Env.read_env()
 
 
 def send_message(chat_id, text):
-    url = f"https://api.telegram.org/bot{os.getenv("BOT_TOKEN")}/sendMessage"
+    url = f"https://api.telegram.org/bot{env("BOT_TOKEN")}/sendMessage"
     payload = {"chat_id": chat_id, "text": text}
     requests.post(url, data=payload)
 

@@ -22,7 +22,7 @@ environ.Env.read_env()
 
 FINE_MULTIPLIER = 2
 SUCCESS_URL = f"https://{env('WEBHOOK_WITHOUT_PROTOCOL_AND_PATH')}/api/payments/success-pay/?session_id="
-CANCEL_URL = f"https://{env('WEBHOOK_WITHOUT_PROTOCOL_AND_PATH')}/api/payments/cancel-pay/"
+CANCEL_URL = f"https://{env('WEBHOOK_WITHOUT_PROTOCOL_AND_PATH')}/api/payments/cancel-pay/?session_id="
 
 stripe.api_key = env("STRIPE_PRIVATE_KEY")
 
@@ -123,7 +123,7 @@ def create_checkout_session(borrowing_id: int):
         }],
         mode="payment",
         success_url=SUCCESS_URL + "{CHECKOUT_SESSION_ID}",
-        cancel_url=CANCEL_URL
+        cancel_url=CANCEL_URL + "{CHECKOUT_SESSION_ID}"
     )
     Payment.objects.create(
         type="PAYMENT",
@@ -155,7 +155,7 @@ def create_fine_checkout_session(borrowing_id: int, count_of_delay_days: int) ->
         }],
         mode="payment",
         success_url=SUCCESS_URL + "{CHECKOUT_SESSION_ID}",
-        cancel_url=CANCEL_URL
+        cancel_url=CANCEL_URL + "{CHECKOUT_SESSION_ID}"
     )
     Payment.objects.create(
         type="FINE",
@@ -242,11 +242,17 @@ class CancelPayView(APIView):
     )
     def get(self, request, *args, **kwargs):
         user = get_user_model().objects.get(pk=self.request.user.pk)
-        canceled_pay = Payment.objects.get(status="PENDING")
-        borrowing = Borrowing.objects.get(pk=canceled_pay.pk)
-        borrowing.actual_return_date = None
+        session_id = self.request.query_params.get("session_id")
+        try:
+            canceled_pay = Payment.objects.get(session_id=str(session_id))
+        except Payment.DoesNotExist:
+            return Response(
+                {"message": "Payment with given session id does not exist!"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        borrowing = Borrowing.objects.get(pk=canceled_pay.borrowing_id)
         canceled_pay.delete()
-        borrowing.save()
+        borrowing.delete()
         try:
             user_profile = UserProfile.objects.get(email=user)
             send_message(chat_id=user_profile.telegram_chat_id, text="You canceled the payment. Please try again...")

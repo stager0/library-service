@@ -2,6 +2,7 @@ from django.db import transaction
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
+from books.models import Book
 from books.serializers import BookSerializer
 from borrowings.models import Borrowing
 from payments.views import create_checkout_session
@@ -29,6 +30,7 @@ class BorrowingReturnSerializer(serializers.ModelSerializer):
 
 class BorrowingCreateSerializer(BorrowingSerializer):
     checkout_session = serializers.SerializerMethodField(required=False, allow_null=True)
+
     class Meta:
         model = Borrowing
         fields = ("id", "borrow_date", "expected_return_date", "checkout_session", "book", "pay_status")
@@ -52,15 +54,19 @@ class BorrowingCreateSerializer(BorrowingSerializer):
             f"Price per day: {book.daily_fee}\n"
 
         email = user.email
-        profile_chat_id = UserProfile.objects.get(email=email).telegram_chat_id
-
-        send_message(chat_id=profile_chat_id, text=f"You have new borrowing:\n{data}")
+        try:
+            profile_chat_id = UserProfile.objects.get(email=email).telegram_chat_id
+            send_message(chat_id=profile_chat_id, text=f"You have new borrowing:\n{data}")
+        except UserProfile.DoesNotExist:
+            pass
 
         return borrowing
 
     @extend_schema_field(str)
     def get_checkout_session(self, obj):
-        return create_checkout_session(obj.pk).url
+        if isinstance(obj, Borrowing):
+            return create_checkout_session(obj.pk).url
+        return None
 
     def validate_expected_return_date(self, value):
         if value:

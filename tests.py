@@ -15,6 +15,8 @@ from books.models import Book
 from books.serializers import BookSerializer
 from borrowings.models import Borrowing
 from borrowings.serializers import BorrowingSerializer
+from payments.models import Payment
+from payments.serializers import PaymentSerializer
 
 
 class BaseCase(TestCase):
@@ -59,6 +61,22 @@ class BaseCase(TestCase):
             book=self.book1,
             user=self.superuser
         ),
+        self.payment = Payment.objects.create(
+            status="PAID",
+            type="PAYMENT",
+            borrowing_id=1,
+            session_url="https://fake.com",
+            session_id="fake_id_777777779999999900000",
+            money_to_pay=19.99
+        )
+        self.payment1 = Payment.objects.create(
+            status="PAID",
+            type="FINE",
+            borrowing_id=2,
+            session_url="https://fake.com",
+            session_id="fake_id_777723423479999999900000",
+            money_to_pay=29.99
+        )
         self.refresh = RefreshToken.for_user(self.user)
         self.super_refresh = RefreshToken.for_user(self.superuser)
         self.access_token = str(self.refresh.access_token)
@@ -253,3 +271,60 @@ class BorrowingsApiTests(BaseCase):
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
+
+class PaymentApiTest(BaseCase):
+    def setUp(self):
+        super().setUp()
+        self.list_url = reverse("payments:payment_list")
+        self.detail_url = reverse("payments:payment_detail", kwargs={"pk": 1})
+
+    def test_if_user_gets_only_his_payments_and_contains_his_payments_status_200(self):
+        response = self.client.get(self.list_url)
+
+        user_borrowings = Borrowing.objects.filter(user=self.user.id).values_list("id", flat=True)
+        users_payments = Payment.objects.filter(borrowing_id__in=user_borrowings)
+        serializer = PaymentSerializer(users_payments, many=True)
+
+        payment = Payment.objects.get(id=1)
+        payment1 = Payment.objects.get(id=2)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(serializer.data, response.data)
+        self.assertContains(response, payment.type)
+        self.assertContains(response, payment.status)
+        self.assertNotContains(response, payment1.type)
+        self.assertNotContains(response, payment1.money_to_pay)
+
+
+    def test_create_payment_if_user_is_unauthorized_status_401(self):
+        self.client.logout()
+        response = self.client.post(self.list_url)
+
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+    def test_create_payment_when_user_is_authorized_status_405(self):
+        response = self.client.post(self.list_url)
+
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def test_if_anonymous_user_enters_status_401(self):
+        self.client.logout()
+        response = self.client.get(self.list_url)
+
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_delete_payment_if_is_staff_false_status_405(self):
+        response = self.client.delete(self.detail_url)
+
+        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def test_retrieve_status_200(self):
+        response = self.client.get(self.detail_url)
+
+        payment = Payment.objects.filter(id=1)
+        serializer = PaymentSerializer(payment, many=True)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(serializer.data, response.data)
+        self.assertNotContains(response, self.payment1.type)

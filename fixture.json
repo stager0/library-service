@@ -1,0 +1,98 @@
+[
+  {
+    "model": "users.user", "pk": 1, "fields": { "password": "pbkdf2_sha256$1000000$SxJonlp7YQRtMXTfzsZDZN$Mw/jeoov2I4qU8cctbGiaqQi22XgD094dxWszs3flks=", "is_superuser": true, "first_name": "Admin", "last_name": "Main", "is_staff": true, "is_active": true, "date_joined": "2025-05-01T10:00:00Z", "email": "admin@admin.com" }
+  },
+  {
+    "model": "users.user", "pk": 2, "fields": { "password": "pbkdf2_sha256$1000000$SxJonlp7YQRtMXTfzsZDZN$Mw/jeoov2I4qU8cctbGiaqQi22XgD094dxWszs3flks=", "is_superuser": true, "first_name": "Alice Admin", "last_name": "Wonder", "is_staff": true, "is_active": true, "date_joined": "2025-05-02T11:00:00Z", "email": "alice_admin@example.com" }
+  },
+  {
+    "model": "users.user", "pk": 3, "fields": { "password": "pbkdf2_sha256$1000000$SxJonlp7YQRtMXTfzsZDZN$Mw/jeoov2I4qU8cctbGiaqQi22XgD094dxWszs3flks=", "is_superuser": false, "first_name": "Bob", "last_name": "Marley", "is_staff": false, "is_active": true, "date_joined": "2025-05-03T12:00:00Z", "email": "bob@example.com" }
+  },
+  {
+    "model": "users.user", "pk": 4, "fields": { "password": "pbkdf2_sha256$1000000$SxJonlp7YQRtMXTfzsZDZN$Mw/jeoov2I4qU8cctbGiaqQi22XgD094dxWszs3flks=", "is_superuser": false, "first_name": "Charlie", "last_name": "Chaplin", "is_staff": false, "is_active": true, "date_joined": "2025-05-04T13:00:00Z", "email": "charlie@example.com" }
+  },
+  {
+    "model": "users.user", "pk": 5, "fields": { "password": "pbkdf2_sha256$1000000$SxJonlp7YQRtMXTfzsZDZN$Mw/jeoov2I4qU8cctbGiaqQi22XgD094dxWszs3flks=", "is_superuser": false, "first_name": "Diana", "last_name": "Prince", "is_staff": false, "is_active": true, "date_joined": "2025-05-05T14:00:00Z", "email": "diana@example.com" }
+  },
+  {
+    "model": "books.book", "pk": 1, "fields": { "title": "The Hobbit", "author": "J.R.R. Tolkien", "cover": "Hard", "inventory": 5, "daily_fee": "2.50" }
+  },
+  {
+    "model": "books.book", "pk": 2, "fields": { "title": "Dune", "author": "Frank Herbert", "cover": "Soft", "inventory": 3, "daily_fee": "3.00" }
+  },
+  {
+    "model": "books.book", "pk": 3, "fields": { "title": "1984", "author": "George Orwell", "cover": "Soft", "inventory": 10, "daily_fee": "1.75" }
+  },
+  {
+    "model": "books.book", "pk": 4, "fields": { "title": "Foundation", "author": "Isaac Asimov", "cover": "Hard", "inventory": 8, "daily_fee": "2.25" }
+  },
+  {
+    "model": "books.book", "pk": 5, "fields": { "title": "Brave New World", "author": "Aldous Huxley", "cover": "Soft", "inventory": 12, "daily_fee": "1.50" }
+  },
+  {
+    "model": "books.book", "pk": 6, "fields": { "title": "The Hitchhiker's Guide to the Galaxy", "author": "Douglas Adams", "cover": "Soft", "inventory": 20, "daily_fee": "2.00" }
+  },
+  {
+    "model": "books.book", "pk": 7, "fields": { "title": "Fahrenheit 451", "author": "Ray Bradbury", "cover": "Soft", "inventory": 0, "daily_fee": "1.80" }
+  },
+  {
+    "model": "books.book", "pk": 8, "fields": { "title": "Neuromancer", "author": "William Gibson", "cover": "Soft", "inventory": 4, "daily_fee": "3.25" }
+  },
+  {
+    "model": "books.book", "pk": 9, "fields": { "title": "The Stand", "author": "Stephen King", "cover": "Hard", "inventory": 2, "daily_fee": "2.75" }
+  },
+  {
+    "model": "books.book", "pk": 10, "fields": { "title": "Hyperion", "author": "Dan Simmons", "cover": "Hard", "inventory": 6, "daily_fee": "3.50" }
+  },
+  {
+    "model": "borrowings.borrowing", "pk": 1, "fields": { "borrow_date": "2025-06-08T10:00:00Z", "expected_return_date": "2025-06-15T10:00:00Z", "actual_return_date": null, "pay_status": "Paid", "book": 1, "user": 2 }
+  },
+  {
+    "model": "borrowings.borrowing", "pk": 2, "fields": { "borrow_date": "2025-05-15T11:00:00Z", "expected_return_date": "2025-05-22T11:00:00Z", "actual_return_date": "2025-05-21T18:00:00Z", "pay_status": "Paid", "book": 4, "user": 2 }
+  },
+  {
+    "model": "borrowings.borrowing", "pk": 3, "fields": { "borrow_date": "2025-05-28T09:00:00Z", "expected_return_date": "2025-06-04T09:00:00Z", "actual_return_date": null, "pay_status": "Paid", "book": 2, "user": 3 }
+  },
+  {
+    "model": "borrowings.borrowing", "pk": 4, "fields": { "borrow_date": "2025-05-01T14:00:00Z", "expected_return_date": "2025-05-08T14:00:00Z", "actual_return_date": "2025-05-10T16:00:00Z", "pay_status": "Paid", "book": 5, "user": 3 }
+  },
+  {
+    "model": "borrowings.borrowing", "pk": 5, "fields": { "borrow_date": "2025-06-09T17:00:00Z", "expected_return_date": "2025-06-19T17:00:00Z", "actual_return_date": null, "pay_status": "Pending", "book": 3, "user": 4 }
+  },
+  {
+    "model": "borrowings.borrowing", "pk": 6, "fields": { "borrow_date": "2025-04-20T10:00:00Z", "expected_return_date": "2025-04-27T10:00:00Z", "actual_return_date": "2025-04-27T10:00:00Z", "pay_status": "Paid", "book": 1, "user": 5 }
+  },
+  {
+    "model": "borrowings.borrowing", "pk": 7, "fields": { "borrow_date": "2025-06-07T11:20:00Z", "expected_return_date": "2025-06-14T11:20:00Z", "actual_return_date": null, "pay_status": "Pending", "book": 6, "user": 4 }
+  },
+  {
+    "model": "payments.payment", "pk": 1, "fields": { "status": "Pending", "type": "Payment", "borrowing_id": 1, "session_url": "https://stripe.example.com/session/sess_alice_active", "session_id": "sess_alice_active", "money_to_pay": "17.50" }
+  },
+  {
+    "model": "payments.payment", "pk": 2, "fields": { "status": "Paid", "type": "Payment", "borrowing_id": 2, "session_url": "https://stripe.example.com/session/sess_alice_paid", "session_id": "sess_alice_paid", "money_to_pay": "15.75" }
+  },
+  {
+    "model": "payments.payment", "pk": 3, "fields": { "status": "Pending", "type": "Payment", "borrowing_id": 3, "session_url": "https://stripe.example.com/session/sess_bob_overdue_payment", "session_id": "sess_bob_overdue_payment", "money_to_pay": "21.00" }
+  },
+  {
+    "model": "payments.payment", "pk": 4, "fields": { "status": "Pending", "type": "Fine", "borrowing_id": 3, "session_url": "https://stripe.example.com/session/sess_bob_overdue_fine", "session_id": "sess_bob_overdue_fine", "money_to_pay": "36.00" }
+  },
+  {
+    "model": "payments.payment", "pk": 5, "fields": { "status": "Paid", "type": "Payment", "borrowing_id": 4, "session_url": "https://stripe.example.com/session/sess_bob_late_payment", "session_id": "sess_bob_late_payment", "money_to_pay": "10.50" }
+  },
+  {
+    "model": "payments.payment", "pk": 6, "fields": { "status": "Paid", "type": "Fine", "borrowing_id": 4, "session_url": "https://stripe.example.com/session/sess_bob_late_fine_paid", "session_id": "sess_bob_late_fine_paid", "money_to_pay": "6.00" }
+  },
+  {
+    "model": "payments.payment", "pk": 7, "fields": { "status": "Pending", "type": "Payment", "borrowing_id": 5, "session_url": "https://stripe.example.com/session/sess_charlie_active1", "session_id": "sess_charlie_active1", "money_to_pay": "17.50" }
+  },
+  {
+    "model": "payments.payment", "pk": 8, "fields": { "status": "Paid", "type": "Payment", "borrowing_id": 6, "session_url": "https://stripe.example.com/session/sess_diana_paid", "session_id": "sess_diana_paid", "money_to_pay": "17.50" }
+  },
+  {
+    "model": "payments.payment", "pk": 9, "fields": { "status": "Pending", "type": "Payment", "borrowing_id": 7, "session_url": "https://stripe.example.com/session/sess_charlie_active2", "session_id": "sess_charlie_active2", "money_to_pay": "14.00" }
+  },
+  {
+    "model": "telegram_bot.userprofile", "pk": 1, "fields": { "telegram_chat_id": "5355009018", "email": "admin@example.com" }
+  }
+]

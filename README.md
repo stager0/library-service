@@ -27,15 +27,28 @@
 - **Ngrok** for testing Telegram API locally
 - **Django TestCase** for unit testing
 
+
+## Diagram:
+
+![diagram_final.jpg](diagram_final.jpg)
+
 ## Screenshots:
+
 1. **Book-list** - Example of the available books list output.
+
 ![book-list.png](screenshots%20%28README%29/book-list.png)
+
 2. **Borrowing Create** - Example output when creating a borrowing. A payment link is provided immediately upon creation.
+
 ![borrowing-create.png](screenshots%20%28README%29/borrowing-create.png)
+
 3. **Borrowing Return** - Admin-only functionality. When returning a book, admins check payment status and generate a payment link through Stripe if necessary.
+
 ![borrowing_pk_return-book.png](screenshots%20%28README%29/borrowing_pk_return-book.png)
 4. **Payment Cancellation** - If the payment is canceled, the system outputs a cancellation message, sends a Telegram notification, and deletes the borrowing and payment records from the database.
+
 ![cancel_pay.png](screenshots%20%28README%29/cancel_pay.png)
+
 5. **Example Telegram message during authorization**.
 
 ![telegram_start_and_login.jpg](screenshots%20%28README%29/telegram_start_and_login.jpg)
@@ -53,14 +66,23 @@
 ![telegram_success_payment_sms.jpg](screenshots%20%28README%29/telegram_success_payment_sms.jpg)
 
 9. **Library Service URL Schema** - Visual representation of the API endpoints and routes.
+
 ![paths.png](screenshots%20%28README%29/paths.png)
+
 10. **Payment-list** - Example of a list of payments associated with a user. Admins can view all payments.
+
 ![payment-list.png](screenshots%20%28README%29/payment-list.png)
+
 11. **Stripe Payment Page** - Example of a Stripe payment page for completing transactions.
+
 ![payment_stripe.png](screenshots%20%28README%29/payment_stripe.png)
+
 12. **Success Payment Page** - Example of a successful payment page. After this, the borrowing and fine statuses are updated in the database.
+
 ![success_pay.png](screenshots%20%28README%29/success_pay.png)
+
 13. **Swagger** - Example of the Swagger UI for testing the API endpoints.
+
 ![swagger1.png](screenshots%20%28README%29/swagger1.png)
 ![swagger2.png](screenshots%20%28README%29/swagger2.png)
 

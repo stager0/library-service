@@ -20,3 +20,5 @@ COPY . .
 
 RUN chmod +x start-ngrok.sh
 RUN chmod +x entrypoint.sh
+
+CMD ["python", "/app/telegram_bot/set_webhook.py"]

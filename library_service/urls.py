@@ -24,7 +24,7 @@ urlpatterns = [
     path("api/library/", include("books.urls", namespace="books")),
     path("api/user/", include("users.urls", namespace="users")),
     path("api/administration/", include("borrowings.urls", namespace="borrowings")),
-    path("api/telegram_bot/", include("telegram_bot.urls", namespace="telegram_bot")),
+    path("api/", include("telegram_bot.urls", namespace="telegram_bot")),
     path("api/payments/", include("payments.urls", namespace="payments")),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("api/schema/swagger-ui/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),

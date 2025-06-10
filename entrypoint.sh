@@ -18,6 +18,8 @@ echo "--- The end of the checking ---"
 if [ "$1" = "python" ] && [ "$2" = "manage.py" ] && [ "$3" = "runserver" ]; then
     echo "Execution of migration..."
     python manage.py migrate
+    python /app/telegram_bot/set_webhook.py
+
 fi
 
 exec "$@"

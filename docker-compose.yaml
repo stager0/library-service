@@ -1,23 +1,6 @@
 services:
-  library_service:
-    build: .
-    command: >
-      sh -c "
-      python manage.py migrate &&
-      python manage.py runserver 0.0.0.0:8100
-      "
-    volumes:
-      - .:/app
-      - ./db.sqlite3:/app/db.sqlite3
-    ports:
-      - "8100:8100"
-    depends_on:
-      - redis
-    env_file:
-      - .env
-
   redis:
-    image: redis:latest
+    image: redis:7-alpine
     ports:
       - "6379:6379"
 
@@ -25,26 +8,53 @@ services:
     build: .
     command: >
       sh -c "
-      ngrok config add-authtoken ${NGROK_AUTHTOKEN} &&
-      ngrok http library_service:8100 --log=stdout
+        ngrok config add-authtoken $$NGROK_AUTHTOKEN &&
+        ./start-ngrok.sh
       "
     ports:
       - "4040:4040"
+    env_file:
+      - .env
+    volumes:
+      - ngrok-data:/ngrok-data
+
+  library_service:
+    build: .
+    entrypoint: ./entrypoint.sh
+    command: python manage.py runserver 0.0.0.0:8100
+    volumes:
+      - .:/app
+      - ngrok-data:/ngrok-data
+    ports:
+      - "8100:8100"
     depends_on:
-      - library_service
+      - redis
+    env_file:
+      - .env
 
   celery:
     build: .
+    entrypoint: ./entrypoint.sh
     command: celery -A library_service worker --loglevel=info
     volumes:
       - .:/app
+      - ngrok-data:/ngrok-data
+    env_file:
+      - .env
     depends_on:
       - redis
 
   celery-beat:
     build: .
+    entrypoint: ./entrypoint.sh
     command: celery -A library_service beat --loglevel=info
     volumes:
       - .:/app
+      - ngrok-data:/ngrok-data
+    env_file:
+      - .env
     depends_on:
       - redis
+
+volumes:
+  ngrok-data:

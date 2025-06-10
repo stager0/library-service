@@ -13,18 +13,21 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
+import environ
 from celery.schedules import crontab
 from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
-load_dotenv()
+env = environ.Env()
+environ.Env.read_env()
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv("SECRET_KEY")
+
+SECRET_KEY = env("SECRET_KEY")
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -47,7 +50,8 @@ INSTALLED_APPS = [
     "telegram_bot",
     "rest_framework",
     "payments",
-    "django_celery_beat"
+    "django_celery_beat",
+    "drf_spectacular"
 ]
 
 MIDDLEWARE = [
@@ -134,7 +138,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
-    )
+    ),
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema"
 }
 
 SIMPLE_JWT = {
@@ -143,7 +148,13 @@ SIMPLE_JWT = {
     "ROTATE_REFRESH_TOKENS": False
 }
 
-ALLOWED_HOSTS = ["127.0.0.1", "localhost", os.getenv("WEBHOOK_WITHOUT_PROTOCOL_AND_PATH"), "1747-176-3-135-185.ngrok-free.app"]
+ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+
+NGROK_HOST = os.environ.get("WEBHOOK_WITHOUT_PROTOCOL_AND_PATH")
+
+if NGROK_HOST:
+    print(f"Adding ngrok host to ALLOWED_HOSTS: {NGROK_HOST}")
+    ALLOWED_HOSTS.append(NGROK_HOST)
 
 CELERY_BROKER_URL = "redis://redis:6379/0"
 
@@ -158,6 +169,13 @@ CELERY_BEAT_SCHEDULE = {
     }
 }
 
-STRIPE_PUBLIC_KEY = os.getenv("STRIPE_PUBLIC_KEY")
+STRIPE_PUBLIC_KEY = env("STRIPE_PUBLIC_KEY")
 
-STRIPE_PRIVATE_KEY = os.getenv("STRIPE_PRIVATE_KEY")
+STRIPE_PRIVATE_KEY = env("STRIPE_PRIVATE_KEY")
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Library Service API",
+    "DESCRIPTION": "Library Service API. The best Library.",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+}

@@ -14,4 +14,4 @@ class Book(models.Model):
     daily_fee = models.DecimalField(decimal_places=2, max_digits=8)
 
     def __str__(self):
-        return f"Title: {self.title}, Author: {self.author}, Daily Fee {self.daily_fee}"
+        return f"Title: {self.title}, Author: {self.author}, Daily Fee {float(self.daily_fee)}"

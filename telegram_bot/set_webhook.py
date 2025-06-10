@@ -1,9 +1,8 @@
-import os
-
 import requests
-from dotenv import load_dotenv
+from environ import environ
 
-load_dotenv()
+env = environ.Env()
+environ.Env.read_env()
 
-response = requests.post(f"https://api.telegram.org/bot{os.getenv("BOT_TOKEN")}/setWebhook", data={"url": {os.getenv("WEBHOOK_URL")}})
+response = requests.post(f"https://api.telegram.org/bot{env('BOT_TOKEN')}/setWebhook", data={"url": {env("WEBHOOK_URL")}})
 print(response.json())

@@ -70,10 +70,10 @@
 2. Run the following command to build and start the Docker containers:
    ```bash
    docker-compose up --build
-Log in using the following credentials:
+3. Log in using the following credentials:
 
-Email: `alice_admin@example.com`
+   Email: `alice_admin@example.com`
 
-Password: `1qazcde3`
+   Password: `1qazcde3`
 
-Once the system is set up, it will be ready to use. You can create borrowings, make payments, and test the functionality with the Telegram bot.
+4. Once the system is set up, it will be ready to use. You can create borrowings, make payments, and test the functionality with the Telegram bot.
